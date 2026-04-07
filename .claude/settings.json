@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "deny": [
+      "Write(/**)",
+      "Edit(/**)",
+      "Bash(rm -rf /*)",
+      "Bash(sudo:*)"
+    ],
+    "allow": [
+      "Write(/Users/admin/Documents/repos/roadmap-builder/**)",
+      "Edit(/Users/admin/Documents/repos/roadmap-builder/**)",
+      "Read(/Users/admin/Documents/repos/roadmap-builder/**)",
+      "Bash"
+    ]
+  }
+}
