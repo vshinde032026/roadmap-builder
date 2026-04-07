@@ -24,6 +24,7 @@ yarn-debug.log*
 pnpm-debug.log*
 package-lock.json
 yarn.lock
+*.tsbuildinfo
 
 # Editors / OS
 .vscode/
