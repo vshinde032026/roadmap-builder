@@ -1,0 +1,317 @@
+# Roadmap Builder — Product Requirements Document
+
+**Status:** Draft v1.1
+**Date:** 2026-04-07
+**Stage:** Pre-MVP
+
+---
+
+## Pressure-test
+
+**Who is this for?**
+Self-directed learners who know *what* they want to achieve but not *how* to sequence the learning. Typically: career-switchers, hobbyists picking up a new skill, or early-career engineers filling gaps. They are already motivated — they just waste hours curating a syllabus instead of learning.
+
+**Why now?**
+LLMs can generate coherent, opinionated learning trees in seconds. Real-time web search lets the system attach fresh, free resources rather than static links that rot. The combination — structured curriculum + live resource discovery — was not cheaply achievable before 2023.
+
+**What's the wedge vs. roadmap.sh?**
+roadmap.sh is the UX inspiration (see below), but its roadmaps are hand-curated by a community for a fixed list of developer topics. Our product generates a roadmap for *any* objective the user types — not just software roles — using an LLM, and fetches free resources live from the web per node. They get curated quality on ~50 topics. We get infinite coverage on any topic in any domain: "become a pastry chef," "learn options trading," "prepare for the AWS Solutions Architect exam." Same visual UX contract; different reach.
+
+**What could kill it?**
+1. Resource quality is low or irrelevant — the core value proposition collapses.
+2. ChatGPT / Perplexity already does this well enough in a chat thread.
+3. No retention mechanism — users get the roadmap, leave, and never return (zero LTV).
+4. Search API costs make unit economics ugly at scale.
+
+---
+
+## Problem
+
+Self-directed learners spend hours assembling a learning plan before they can start learning. They search for "how to become a data engineer," get a Reddit thread from 2021, a Medium post with affiliate links, and a course ad — then do it again for every sub-topic. The curation work is repeated by millions of people for the same objectives, and the output is low quality.
+
+**Cost of inaction:** The learner either starts with a bad plan, gives up in the curation phase, or pays $500+ for a bootcamp just to get structure.
+
+---
+
+## Target users
+
+**Primary:** Self-directed adult learner, 22–40, knows what outcome they want, comfortable finding resources online but time-constrained. Not a student (they have structure already); not a total beginner to self-learning.
+
+**Out of scope for MVP:** Teams, educators building curricula, enterprise L&D.
+
+---
+
+## Goal
+
+Enable any learner to go from a one-line learning objective to a structured, visual, resource-linked roadmap in under 90 seconds — without any prior account or configuration.
+
+---
+
+## Non-goals
+
+- We do not host, create, or gate any learning content ourselves.
+- We do not track learning progress in MVP (no "mark complete," no streaks — see Post-MVP).
+- We do not support team or collaborative roadmaps in MVP.
+- We do not support multiple simultaneous roadmaps per session in MVP.
+- We are not a course marketplace; we do not earn affiliate commissions in MVP.
+- We do not support offline use.
+- We do not build or maintain hand-curated roadmaps; everything is LLM-generated.
+
+---
+
+## UX model — visual graph (roadmap.sh-inspired)
+
+The canonical interaction is a **visual directed graph** of topic nodes, not a text outline or collapsible list. roadmap.sh (roadmap.sh) is the explicit design reference for the visual and interaction pattern.
+
+**Landing page**
+- Prominent free-text input: "What do you want to learn?" with a "Build Roadmap" CTA.
+- Below the input: a row of pre-built example roadmaps (generated, not curated) for well-known objectives (e.g., Frontend Developer, Backend Developer, Data Science, Machine Learning, DevOps) to give new users a starting point and demonstrate the product immediately.
+- Clicking an example loads that roadmap as if the user had typed it.
+
+**Roadmap canvas**
+- The roadmap renders as a **top-down directed graph**: a main path of rectangular nodes connected by lines, with branch nodes hanging off each main-path node for sub-topics.
+- Example structure for "Frontend Developer":
+  - Main path: Internet → HTML → CSS → JavaScript → Version Control → ...
+  - Internet branches to: "How does the internet work?", "HTTP", "DNS", "Browsers", "Hosting"
+- Nodes have two visual states: unvisited and visited (visited = lighter/checked). Progress tracking is post-MVP; visited state in MVP can be toggled locally without persistence.
+- The graph must be pannable and zoomable on desktop. On mobile, a simplified linear view is acceptable.
+
+**Node side panel**
+- Clicking any node opens a **side panel** (slides in from the right, does not navigate away from the canvas).
+- The side panel contains:
+  1. Node title (large).
+  2. Short description: 2–4 sentences explaining the concept and why it matters in the context of the roadmap objective. Generated by the LLM at roadmap creation time and stored with the roadmap.
+  3. Free resources list (see Resources Panel spec below).
+- Clicking the same node again, or pressing Escape, closes the panel.
+- The canvas remains interactive while the panel is open.
+
+---
+
+## User stories
+
+### US-1: Generate a roadmap
+As a self-directed learner, I want to type a learning objective and receive a structured visual roadmap, so that I can understand what I need to learn and in what order without spending hours on research.
+
+Acceptance:
+- [ ] User submits a free-text objective (1–300 characters).
+- [ ] System returns a roadmap with a title, a main-path sequence of topic nodes, and 2–5 branch sub-topic nodes per main-path node.
+- [ ] Roadmap renders as a visual directed graph (not a plain list) within 15 seconds of submission on a standard broadband connection.
+- [ ] If generation fails or times out, user sees a clear error with a retry option.
+
+### US-2: Click a node to see resources
+As a learner, I want to click any node on the roadmap and see free learning resources for that topic in a side panel, so that I can start learning immediately without a separate search.
+
+Acceptance:
+- [ ] Clicking any node opens a side panel without navigating away from the roadmap.
+- [ ] The panel shows: node title, short description (2–4 sentences), and a list of 2–5 free resources.
+- [ ] Each resource shows: title, source domain, content-type tag (Video / Article / Course / Official Docs), and a direct URL that opens in a new tab.
+- [ ] Resources are tagged and sorted per the Resources Panel spec (see below).
+- [ ] Resources load within 10 seconds of the panel opening (can be lazy-fetched on panel open if not pre-cached).
+- [ ] If no resources are found, the panel shows the description and a "No resources found" fallback state — it does not show empty or broken UI.
+- [ ] Closing the panel returns the user to the full canvas with no state loss.
+
+### US-3: Browse example roadmaps
+As a first-time visitor, I want to see and open pre-built example roadmaps, so that I can understand what the product does and start exploring without typing anything.
+
+Acceptance:
+- [ ] Landing page shows at least 6 example objectives as clickable cards/chips.
+- [ ] Clicking an example loads that roadmap on the canvas (same experience as generating from scratch).
+- [ ] Examples are generated-and-cached, not hand-curated; they update if regenerated.
+
+### US-4: Share a roadmap
+As a learner, I want to share my roadmap via a URL, so that I can show it to others or return to it later.
+
+Acceptance:
+- [ ] Each generated roadmap gets a unique, persistent URL (e.g., `/roadmap/<id>`).
+- [ ] Opening the URL reproduces the same roadmap without requiring the viewer to log in.
+- [ ] URL is copyable from a visible share button on the roadmap canvas.
+
+### US-5: Regenerate or adjust the roadmap
+As a learner, I want to regenerate a roadmap if the result doesn't match my intent, so that I'm not stuck with a bad first attempt.
+
+Acceptance:
+- [ ] User can trigger a full regeneration with the same or edited objective.
+- [ ] Previous roadmap is discarded and replaced (no history in MVP).
+
+---
+
+## Resources panel spec
+
+This is a first-class product component, not a "nice to have."
+
+**What counts as "free"**
+A resource is free if it requires no payment to access the core content. Acceptable: free YouTube videos, MDN, freeCodeCamp, official docs, free-tier Coursera/edX content, blog posts, open-access papers. Not acceptable: paywalled courses (Udemy paid, Pluralsight, LinkedIn Learning), content behind a subscription wall, or PDF downloads from unknown sources.
+
+**Content-type tags (mutually exclusive, pick one)**
+
+| Tag | Criteria |
+|---|---|
+| Video | YouTube or other video platform URL |
+| Course | Structured multi-lesson curriculum (freeCodeCamp path, Coursera free audit, Khan Academy) |
+| Official Docs | Documentation published by the creator/maintainer of the technology or standard |
+| Article | Blog post, tutorial, or written guide |
+
+**Ordering within the panel**
+1. Official Docs (if available — highest trust signal).
+2. Course (structured learning > single articles).
+3. Video.
+4. Article.
+
+Within each tag group, order by search API rank (no additional signal available in MVP).
+
+**Resource count:** 2–5 per node. Surface fewer if quality is questionable — do not pad to hit 5.
+
+**Fallback if nothing good is found**
+If the search API returns zero results or all results fail the "free" filter:
+- Show the node description.
+- Show one fallback link: a pre-formatted Google search URL for `"<node name> tutorial free"` in a new tab.
+- Label it clearly as "Search for resources" — do not present it as a curated result.
+
+**Domain allowlist (preferred)**
+Prefer results from: YouTube, MDN, freeCodeCamp, Khan Academy, official project/standard documentation domains, Wikipedia, dev.to, CSS-Tricks, The Odin Project, MIT OpenCourseWare. Results from these domains should be prioritized in ranking even if the search API returns them lower.
+
+**Domain blocklist (reject)**
+Reject results from: udemy.com (paid), pluralsight.com, linkedin.com/learning, skillshare.com, and any URL that redirects to a paywall on spot-check.
+
+---
+
+## Key user flows
+
+### Flow A: New roadmap (happy path)
+1. User lands on home page — sees text input and example roadmap cards.
+2. User types objective (or clicks an example), submits.
+3. Loading state shown (skeleton graph or progress indicator).
+4. Visual roadmap graph renders on the canvas.
+5. User clicks a node — side panel slides in with description + resources.
+6. Unique URL is generated; share button visible on canvas.
+
+### Flow B: Resource fetch fails (partial degradation)
+1. Roadmap canvas renders normally.
+2. User clicks a node — panel opens with description.
+3. Resources section shows "Couldn't load resources" with the fallback search link.
+4. A per-panel retry button is available.
+
+### Flow C: Return to a shared roadmap
+1. User opens a `/roadmap/<id>` URL directly.
+2. Roadmap loads from storage — no re-generation, no LLM call.
+3. Resources are re-fetched on panel open if stale (>7 days) or loaded from cache if fresh.
+
+---
+
+## Functional requirements
+
+### Input & generation
+- FR-1: Accept free-text learning objective; strip and validate: min 3 chars, max 300 chars.
+- FR-2: Call LLM to produce a structured roadmap (JSON): `{ title, nodes: [{ id, label, type: "main"|"branch", parentId, description }] }`. Description is 2–4 sentences, generated per node at creation time.
+- FR-3: Persist generated roadmap to a data store with a UUID-based key.
+- FR-4: Enforce a per-IP rate limit on generation (e.g., 5 roadmaps/hour) to control LLM cost.
+
+### Resource discovery
+- FR-5: For each node, fetch resources lazily when the side panel is first opened (not at roadmap load time, to avoid N×search-API calls on render).
+- FR-6: Issue a search query: `<node label> + <roadmap objective> free tutorial/resource`.
+- FR-7: Return 2–5 results, filtered through the free/blocklist criteria in the Resources Panel spec, tagged by content type.
+- FR-8: Cache search results keyed on (node label + roadmap objective); TTL 7 days.
+- FR-9: Apply the domain allowlist preference and blocklist rejection before returning results to the frontend.
+
+### Roadmap display
+- FR-10: Render roadmap as a visual directed graph (main path + branch nodes). Node layout is top-down or left-right; engineering decides.
+- FR-11: Graph must support pan and zoom on desktop.
+- FR-12: Clicking a node opens a side panel without full navigation; clicking outside or pressing Escape closes it.
+- FR-13: Each resource entry is a clickable external link (`target=_blank`, `rel=noopener`).
+- FR-14: Roadmap page includes a share button that copies the canonical URL to clipboard.
+
+### Storage & sharing
+- FR-15: Roadmaps (including all node descriptions) are stored and retrievable by UUID.
+- FR-16: No authentication required to view or generate a roadmap.
+
+### Non-functional
+- NFR-1: Roadmap generation P95 latency < 15 seconds.
+- NFR-2: Resources panel population P95 latency < 10 seconds from panel open.
+- NFR-3: Frontend is responsive (mobile-readable); mobile gets a simplified linear layout, not the full graph, in MVP.
+- NFR-4: No PII is collected in MVP (no accounts, no tracking beyond basic anonymous analytics).
+
+---
+
+## MVP scope vs. later
+
+### MVP (ship this)
+- Free-text input → LLM-generated visual graph of nodes (main path + branches).
+- Node descriptions generated at creation time and stored.
+- Click-node-to-open-side-panel interaction.
+- Side panel: title, description, free resources fetched live and tagged by type.
+- Resources panel with allow/blocklist, content-type tags, ordering, and fallback.
+- Landing page with example roadmap cards.
+- Persistent shareable URL, no auth.
+- Basic rate limiting on generation.
+- Error states for generation failure and resource fetch failure.
+
+### Post-MVP (do not build yet)
+- User accounts and saved roadmap history.
+- Node completion checkmarks and progress tracking (roadmap.sh parity feature — high user demand but out of scope for MVP).
+- Roadmap editing and manual reordering of nodes.
+- Difficulty / time-to-complete estimates per node.
+- Filtering resources by type within the panel.
+- AI-powered personalization ("I already know SQL — adjust the roadmap").
+- Embedding roadmaps on third-party sites.
+- Team / collaborative roadmaps.
+- Affiliate monetization.
+
+---
+
+## Success metrics
+
+**North star:** Number of roadmaps generated per week (proxy for value delivered).
+
+| Metric | Target | By |
+|---|---|---|
+| Primary: Roadmaps generated / week | 500 | 8 weeks post-launch |
+| Activation: % of sessions that reach roadmap canvas | >70% | At launch |
+| Engagement: % of roadmap sessions where user opens at least 1 node panel | >60% | At launch |
+| Quality: % of node panels where user clicks at least 1 resource | >40% | At launch |
+| Performance: Generation P95 latency | <15s | At launch |
+| Guardrail: Error rate on generation endpoint | <5% | Always |
+| Guardrail: LLM + search cost per roadmap | <$0.10 | Always |
+
+**What we are NOT measuring in MVP:** retention, return visits, or revenue (no mechanism for any of these yet).
+
+---
+
+## Risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| LLM output quality is inconsistent or off-topic | Medium | High | Strict JSON schema + validation; fallback prompt; show regenerate prominently |
+| Search results are low quality, paywalled, or broken links | High | High | Enforce allow/blocklist; validate URLs; cache + flag stale; fallback search link |
+| LLM + search API cost per roadmap exceeds budget | Medium | High | Lazy-load resources per panel open (not per node at render); rate limit from day one; measure cost before scaling |
+| Graph rendering complexity delays frontend | Medium | Medium | Evaluate proven graph libraries (e.g., React Flow, D3) before custom build; scope mobile to linear layout |
+| Competitors (ChatGPT, Perplexity) close the gap | High | Medium | Speed and UX focus; visual graph is a higher fidelity artifact than a chat response; build sharing habit post-MVP |
+| Scraping / search API ToS violations | Medium | High | Use search APIs (Brave Search, SerpAPI, Tavily); do not cache full page content |
+
+---
+
+## Technical notes for engineers
+(These are constraints, not implementation decisions — engineering owns the how.)
+
+- Backend: FastAPI. Roadmap generation and resource search must be separate endpoints. Resource search is triggered on-demand (panel open), not at roadmap generation time.
+- Frontend: React + Vite. The visual graph and side panel are the highest-complexity UI concerns. Evaluate React Flow or a comparable library before building a custom renderer.
+- LLM prompt: Must enforce structured JSON output including per-node descriptions. Use schema-constrained generation if the model supports it. Node descriptions must be generated in the same call as the graph structure — not deferred — to avoid a second LLM round-trip.
+- Storage: A lightweight key-value or document store is sufficient (SQLite is fine for MVP). The full node graph including descriptions must be persisted, not just the objective string.
+- Search: Do not scrape directly. Use a search API. Budget and key management must be planned before any public traffic.
+
+---
+
+## Open questions for founder
+
+1. **LLM provider and budget.** Which LLM are we using (OpenAI, Anthropic, other)? What is the monthly API budget ceiling before we need to throttle or add a paywall?
+
+2. **Search API.** Which search API for resource discovery (SerpAPI, Brave Search, Tavily, other)? Affects cost, quality, and ToS risk. Must be decided before backend work starts.
+
+3. **Graph library decision.** Has engineering evaluated React Flow, D3, or similar for the visual graph? This is the highest frontend risk item and should be prototyped in week 1.
+
+4. **Monetization hypothesis.** Keep free and grow users, or is there a near-term path (paid plan, API access, B2B)? Affects how aggressively we rate-limit.
+
+5. **Roadmap freshness.** Should a shared roadmap URL always show the original graph, or should it regenerate on revisit? Stale resources are a quality risk; re-generation is a cost and consistency risk.
+
+6. **Free resource definition edge cases.** How do we handle resources that are free with a sign-up wall (e.g., freeCodeCamp with an account, Coursera free audit)? Recommend: treat sign-up-gated-but-no-payment as free, but label it "Free (account required)." Founder to confirm.
+
+7. **Spam / abuse threshold.** The rate limit (5 roadmaps/hour/IP) is a placeholder. Drive the real number from cost-per-roadmap measurement in week 1.

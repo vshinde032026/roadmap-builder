@@ -7,6 +7,7 @@ import { ErrorPage } from '@/pages/ErrorPage';
 const HomePage = lazy(() => import('@/pages/HomePage'));
 const RoadmapsPage = lazy(() => import('@/pages/RoadmapsPage'));
 const RoadmapDetailPage = lazy(() => import('@/pages/RoadmapDetailPage'));
+const RoadmapNewPage = lazy(() => import('@/pages/RoadmapNewPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: withSuspense(<HomePage />) },
+      { path: 'roadmap/new', element: withSuspense(<RoadmapNewPage />) },
       { path: 'roadmaps', element: withSuspense(<RoadmapsPage />) },
       { path: 'roadmaps/:id', element: withSuspense(<RoadmapDetailPage />) },
       { path: 'about', element: withSuspense(<AboutPage />) },
