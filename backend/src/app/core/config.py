@@ -22,7 +22,9 @@ class Settings(BaseSettings):
     port: int = 8000
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/roadmap_builder"
+    # MongoDB (used for clips and other document data)
+    mongodb_uri: str = "mongodb://localhost:27017"
+    mongodb_db: str = "roadmap_builder"
 
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"

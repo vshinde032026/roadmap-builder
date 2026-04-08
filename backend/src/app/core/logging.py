@@ -13,6 +13,12 @@ def configure_logging() -> None:
 
     logging.basicConfig(format="%(message)s", level=level)
 
+    # Silence PyMongo SDAM heartbeat / topology chatter — these fire every ~10s
+    # for every node in the replica set and drown out app logs.
+    for noisy in ("pymongo", "pymongo.serverSelection", "pymongo.topology",
+                  "pymongo.heartbeat", "pymongo.command", "pymongo.connection"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
+
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,

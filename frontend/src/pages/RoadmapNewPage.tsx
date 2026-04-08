@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { RoadmapGraph } from '@/features/roadmaps/RoadmapGraph';
+import { ResourcePanel } from '@/features/roadmaps/ResourcePanel';
 import { FIXTURE_ROADMAP } from '@/features/roadmaps/fixtures';
+import type { RoadmapNode } from '@/lib/api/roadmaps';
 
 export default function RoadmapNewPage() {
   const [params] = useSearchParams();
@@ -19,6 +22,7 @@ export default function RoadmapNewPage() {
 
   // TODO: replace with useGenerateRoadmap(objective) once UI work settles.
   const data = FIXTURE_ROADMAP;
+  const [selectedNode, setSelectedNode] = useState<RoadmapNode | null>(null);
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-12">
@@ -29,8 +33,10 @@ export default function RoadmapNewPage() {
       <p className="mt-2 text-xl text-gray-700">{objective}</p>
 
       <div className="mt-8">
-        <RoadmapGraph nodes={data.nodes} />
+        <RoadmapGraph nodes={data.nodes} onNodeClick={setSelectedNode} />
       </div>
+
+      <ResourcePanel node={selectedNode} onClose={() => setSelectedNode(null)} />
     </section>
   );
 }

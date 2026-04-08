@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Roadmap Builder Clipper",
+  "version": "0.1.0",
+  "description": "Save snippets from any webpage to your roadmap.",
+  "permissions": ["contextMenus", "activeTab", "scripting", "storage", "notifications"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Roadmap Builder"
+  }
+}
